@@ -1,6 +1,11 @@
 # LEAP-FROG
-A repository for software related to the CITRIS Aviation Prize proposal LEAP-FROG. The Aircraft is the AYK-250 by Foxtech. 
+A repository for software related to the CITRIS Aviation Prize proposal LEAP-FROG. 
+
+## Aircraft
+The Aircraft is the AYK-250 by Foxtech. 
 ![](https://github.com/dhollenbeck1/LEAP-FROG/blob/main/images/FoxTech-AYK-250.jpg?raw=true)
+
+## Avionics
 The avionics include an autopilot and co-pilot system
 ![](https://github.com/dhollenbeck1/LEAP-FROG/blob/main/images/avionics_diagram_autopilots_4.png?raw=true)
 
