@@ -36,8 +36,13 @@ class UAV:
             if self.wp is not None:
                 print("Waypoints defined")
                 print(self.wp) # -- print out the waypoints
+                File_exists = True
+
+            return File_exists
         else:
             print("The waypoints file does not exist. Make sure it is in the correct directory.")
+            File_exists = False
+            return File_exists
 
     # -- function to initialize the connection between the drone and mission planner
     def connect_UAV(self, tcp, wait_ready):
