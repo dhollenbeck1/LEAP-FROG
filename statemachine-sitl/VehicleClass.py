@@ -40,9 +40,15 @@ class UAV:
 
             return File_exists
         else:
-            print("The waypoints file does not exist. Make sure it is in the correct directory.")
+            self.error_message()
             File_exists = False
             return File_exists
+
+    def error_message(self):
+        print("====================================================================================")
+        print("ERROR: Pre-defined flight path not known! \n")
+        print("Before we can run the simulation or fly the drone, please pre-define a flight path!")
+        print("====================================================================================")
 
     # -- function to initialize the connection between the drone and mission planner
     def connect_UAV(self, tcp, wait_ready):

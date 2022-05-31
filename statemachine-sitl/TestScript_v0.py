@@ -14,7 +14,7 @@ LEAPFROG = VehicleClass.UAV()
 
 # -- read waypoints txt file and define whether or not you will 
 # -- implement a waypoint path from a csv file
-File_exists = LEAPFROG.DefineWaypoints('waypoints.csv')
+File_exists = LEAPFROG.DefineWaypoints('waypoint.csv')
 
 # -- before even running the simulation or flying the drone
 # -- check if the file exists or waypoints are defined in mission planner
