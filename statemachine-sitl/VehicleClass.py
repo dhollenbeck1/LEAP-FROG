@@ -128,15 +128,18 @@ class UAV:
 
         # -- begin looping through all waypoints
         while True:
+            # -- print out the coordinates of the waypoint that the UAV is travelling to
             print("Waypoint %s coordinates: %s, %s" % (self.wp_number, \
                                                         self.wp[self.wp_number][8], \
                                                         self.wp[self.wp_number][9]))
 
+            # -- send the UAV the coordinates of the waypoint wanting to travel to
             point = LocationGlobalRelative(float(self.wp[self.wp_number][8]), \
                                             float(self.wp[self.wp_number][9]), \
                                             float(self.wp[self.wp_number][10]))
             self.vehicle.simple_goto(point, self.vehicle.groundspeed)
             
+            # -- continue looping until UAV meets the waypoint
             while True:
                 # -- get the distance to the waypoint
                 self.distance_to_wp = self.get_distance_metres()
@@ -146,7 +149,8 @@ class UAV:
                 if self.distance_to_wp < self.radius:
                     self.wp_number = self.wp_number + 1
                     break
-
+                
+                # -- used to slow down the printing of the distance from waypoint
                 time.sleep(0.5)
 
             # -- check if the UAV reached the last waypoint within tolerance
