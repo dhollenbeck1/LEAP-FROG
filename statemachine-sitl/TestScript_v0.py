@@ -36,5 +36,5 @@ if File_exists:
     groundspeed = 10
     LEAPFROG.Waypoint_Travel(airspeed, groundspeed)
 
-    # -- land the UAV
+    # -- Safely land the UAV
     LEAPFROG.land()

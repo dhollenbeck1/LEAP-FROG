@@ -167,11 +167,11 @@ class UAV:
 
         # -- Before closing the vehicle, make sure that the drone landed
         while True:
-            print(" Altitude: ", self.vehicle.location.global_relative_frame.alt)
+            print(" Altitude: %s m" % self.vehicle.location.global_relative_frame.alt)
 
             time.sleep(0.25) # -- slow the printing of the altitude of the drone
 
-            # -- Break the loop when the drone lands.
+            # -- Break the loop when the drone lands within some threshold.
             if self.vehicle.location.global_relative_frame.alt <= 0.15:
                 print("UAV successfully landed back at launch")
                 break
