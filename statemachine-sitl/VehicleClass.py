@@ -124,7 +124,7 @@ class UAV:
 
         # -- begin the counter for waypoint number
         self.wp_number = 1
-        self.radius = 70.0
+        self.radius = 90.0 # -- in meters
 
         # -- begin looping through all waypoints
         while True:
