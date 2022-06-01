@@ -129,7 +129,7 @@ class UAV:
         # -- begin looping through all waypoints
         while True:
             # -- print out the coordinates of the waypoint that the UAV is travelling to
-            print("Waypoint %s coordinates: %s, %s" % (self.wp_number, \
+            print("Waypoint %s coordinates (lat, lon): %s, %s" % (self.wp_number, \
                                                         self.wp[self.wp_number][8], \
                                                         self.wp[self.wp_number][9]))
 
@@ -151,7 +151,7 @@ class UAV:
                     break
                 
                 # -- used to slow down the printing of the distance from waypoint
-                time.sleep(0.5)
+                time.sleep(0.25)
 
             # -- check if the UAV reached the last waypoint within tolerance
             # -- if yes, end the waypoint traversal
@@ -165,9 +165,20 @@ class UAV:
         print("Returning to Launch")
         self.vehicle.mode = VehicleMode("QRTL")
 
+        # -- Before closing the vehicle, make sure that the drone landed
+        while True:
+            print(" Altitude: ", self.vehicle.location.global_relative_frame.alt)
+
+            time.sleep(0.25) # -- slow the printing of the altitude of the drone
+
+            # -- Break the loop when the drone lands.
+            if self.vehicle.location.global_relative_frame.alt <= 0.15:
+                print("UAV successfully landed back at launch")
+                break
+
         # -- Close vehicle object before exiting script
         self.vehicle.close()
-        print("Completed")
+        print("Mission completed")
 
     # -- this function will get the distance between the UAV to the waypoint
     def get_distance_metres(self):
