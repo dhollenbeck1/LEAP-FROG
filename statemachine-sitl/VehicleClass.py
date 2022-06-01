@@ -12,6 +12,7 @@ from dronekit import connect, VehicleMode, LocationGlobalRelative
 import time
 import os.path
 import csv
+import math
 
 # -- define a UAV class
 class UAV:
@@ -35,7 +36,7 @@ class UAV:
             # -- inform the user that the waypoints have been defined if list is not empty   
             if self.wp is not None:
                 print("Waypoints defined")
-                print(self.wp) # -- print out the waypoints
+                print(self.wp[0]) # -- print out the waypoints
                 File_exists = True
 
             return File_exists
@@ -104,3 +105,76 @@ class UAV:
                 break
 
             time.sleep(1)
+
+    # -- function that will handle the waypoint traveling
+    def Waypoint_Travel(self, airspeed, groundspeed):
+        print("===========================")
+        print("Beginning waypoint mission.")
+        print("===========================")
+
+        # -- set the UAV's airspeed and ground speed to the defined values
+        self.vehicle.airspeed = airspeed
+        self.vehicle.groundspeed = groundspeed
+
+        # -- initialize boolean for whether or not the UAV finished the waypoints
+        MissionFinished = False
+
+        # -- boolean value for transistioning to a new waypoint
+        self.waypoint_met = False
+
+        # -- begin the counter for waypoint number
+        self.wp_number = 1
+        self.radius = 70.0
+
+        # -- begin looping through all waypoints
+        while True:
+            print("Waypoint %s coordinates: %s, %s" % (self.wp_number, \
+                                                        self.wp[self.wp_number][8], \
+                                                        self.wp[self.wp_number][9]))
+
+            point = LocationGlobalRelative(float(self.wp[self.wp_number][8]), \
+                                            float(self.wp[self.wp_number][9]), \
+                                            float(self.wp[self.wp_number][10]))
+            self.vehicle.simple_goto(point, self.vehicle.groundspeed)
+            
+            while True:
+                # -- get the distance to the waypoint
+                self.distance_to_wp = self.get_distance_metres()
+                print("Distance to waypoint %s: %s m" % (self.wp_number, self.distance_to_wp))
+
+                # -- if the UAV is within the waypoint tolerance, move to the next waypoint
+                if self.distance_to_wp < self.radius:
+                    self.wp_number = self.wp_number + 1
+                    break
+
+                time.sleep(0.5)
+
+            # -- check if the UAV reached the last waypoint within tolerance
+            # -- if yes, end the waypoint traversal
+            if self.distance_to_wp < self.radius and self.wp_number == 6:
+                MissionFinished = True
+                break
+
+    # -- function for landing the UAV and closing the simulation
+    def land(self):
+        # -- return to initial launch site
+        print("Returning to Launch")
+        self.vehicle.mode = VehicleMode("QRTL")
+
+        # -- Close vehicle object before exiting script
+        self.vehicle.close()
+        print("Completed")
+
+    # -- this function will get the distance between the UAV to the waypoint
+    def get_distance_metres(self):
+        """
+        Returns the ground distance in metres between two `LocationGlobal` or `LocationGlobalRelative` objects.
+
+        This method is an approximation, and will not be accurate over large distances and close to the
+        earth's poles. It comes from the ArduPilot test code:
+        https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
+        """
+        # -- calculate the dlat and dlon of the current position to the waypoint
+        dlat = self.vehicle.location.global_relative_frame.lat - float(self.wp[self.wp_number][8])
+        dlong = self.vehicle.location.global_relative_frame.lon - float(self.wp[self.wp_number][9])
+        return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5

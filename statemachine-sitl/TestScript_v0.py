@@ -14,7 +14,7 @@ LEAPFROG = VehicleClass.UAV()
 
 # -- read waypoints txt file and define whether or not you will 
 # -- implement a waypoint path from a csv file
-File_exists = LEAPFROG.DefineWaypoints('waypoint.csv')
+File_exists = LEAPFROG.DefineWaypoints('waypoints.csv')
 
 # -- before even running the simulation or flying the drone
 # -- check if the file exists or waypoints are defined in mission planner
@@ -30,3 +30,11 @@ if File_exists:
     TargetAltitude = 10 # -- target altitude for initial UAV takeoff
     LEAPFROG.arm()
     LEAPFROG.takeoff(TargetAltitude)
+
+    # -- begin waypoint navigation
+    airspeed = 3
+    groundspeed = 10
+    LEAPFROG.Waypoint_Travel(airspeed, groundspeed)
+
+    # -- land the UAV
+    LEAPFROG.land()
