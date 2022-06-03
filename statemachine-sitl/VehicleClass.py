@@ -162,23 +162,10 @@ class UAV:
     # -- function for landing the UAV and closing the simulation
     def land(self):
         # -- return to initial launch site
-        print("Returning to Launch")
-        self.vehicle.mode = VehicleMode("QRTL")
-
-        # -- Before closing the vehicle, make sure that the drone landed
-        while True:
-            print(" Altitude: %s m" % self.vehicle.location.global_relative_frame.alt)
-
-            time.sleep(0.25) # -- slow the printing of the altitude of the drone
-
-            # -- Break the loop when the drone lands within some threshold.
-            if self.vehicle.location.global_relative_frame.alt <= 0.15:
-                print("UAV successfully landed back at launch")
-                break
-
+        self.QRTL()
+        
         # -- Close vehicle object before exiting script
-        self.vehicle.close()
-        print("Mission completed")
+        self.close_drone()
 
     # -- this function will get the distance between the UAV to the waypoint
     def get_distance_metres(self):
@@ -193,3 +180,22 @@ class UAV:
         dlat = self.vehicle.location.global_relative_frame.lat - float(self.wp[self.wp_number][8])
         dlong = self.vehicle.location.global_relative_frame.lon - float(self.wp[self.wp_number][9])
         return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
+
+    def QRTL(self):
+        print("Returning to Launch")
+        self.vehicle.mode = VehicleMode("QRTL")
+
+        # -- Before closing the vehicle, make sure that the drone landed
+        while True:
+            print(" Altitude: %s m" % self.vehicle.location.global_relative_frame.alt)
+
+            time.sleep(0.25) # -- slow the printing of the altitude of the drone
+
+            # -- Break the loop when the drone lands within some threshold.
+            if self.vehicle.location.global_relative_frame.alt <= 0.15:
+                print("UAV successfully landed back at launch")
+                break
+
+    def close_drone(self):
+        self.vehicle.close()
+        print("Mission completed")
