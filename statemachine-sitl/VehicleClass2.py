@@ -17,7 +17,7 @@ import os.path
 import csv
 import math
 
-global mode_currrent, mode_target
+global mode_current, mode_target
 
 # -- define a UAV class
 class UAV:
@@ -226,11 +226,15 @@ class UAV:
         
     def compareMode(self,mode_current):
         global mode_target
-        print("Mode target: %s, Mode current: %s" % (mode_target, mode_current))
-        if (mode_current == mode_target):
+        #print("Mode target: %s, Mode current: %s" % (mode_target, mode_current))
+        #print(str(mode_current)==mode_target)
+        #print(type(mode_current))
+        #print(type(mode_target))
+        if (str(mode_current) == mode_target):
+            print("Mode Change Valid")
             return 1
         else:
-            print("Mode mismatch")
+            print("Error: Mode Mismatch")
             return 0          
         
     def mode_callback(self, attr_name, msg, msg2):
