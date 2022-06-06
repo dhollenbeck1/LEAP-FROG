@@ -95,8 +95,13 @@ class UAV:
             time.sleep(1)
 
         print("UAV arming confirmed. Taking off!")
-        self.vehicle.simple_takeoff(TargetAltitude)  # Take off to target altitude
-
+        while True:
+            if self.vehicle.location.global_relative_frame.alt < 1:
+                self.vehicle.simple_takeoff(TargetAltitude)  # Take off to target altitude
+            else:
+                break 
+            time.sleep(1)
+            
         # -- Wait until the vehicle reaches a safe height before processing the goto
         # -- (otherwise the command after Vehicle.simple_takeoff will execute immediately).
         while True:
@@ -195,12 +200,23 @@ class UAV:
         while True:
             print(" Altitude: %s m" % self.vehicle.location.global_relative_frame.alt)
 
-            time.sleep(0.25) # -- slow the printing of the altitude of the drone
+            time.sleep(1) # -- slow the printing of the altitude of the drone
 
             # -- Break the loop when the drone lands within some threshold.
             if self.vehicle.location.global_relative_frame.alt <= 0.15:
                 print("UAV successfully landed back at launch")
                 break
+            
+    def changeMode(self,newMode):
+        self.vehicle.mode = VehicleMode(newMode)
+        
+    def mode_callback(self, attr_name, msg, msg2):
+        global mode_currrent
+        mode_current = msg2
+        print("The current mode is: %s" % mode_current)
+    #def removeListener_mode(self):
+        
+        
 
     def close_drone(self):
         self.vehicle.close()
