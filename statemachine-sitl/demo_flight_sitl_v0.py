@@ -16,6 +16,18 @@ import time
 #sitl = dronekit_sitl.start_default()
 #connection_string = sitl.connection_string()
     
+
+##########################################
+"""
+Declare Global and Local variables
+"""
+global mode_currrent, mode_target
+global takeoff_alt # -- target altitude for initial UAV takeoff
+
+takeoff_alt = 20 
+mode_current = "VehicleMode:Default"
+mode_target = "VehicleMode:GUIDED"
+
 ##########################################
 """
 PHASE 0: Start Program (initialization)
@@ -28,12 +40,14 @@ PHASE 0: Start Program (initialization)
 LEAPFROG = VehicleClass2.UAV()
 LEAPFROG.connect_UAV('tcp:127.0.0.1:5762', True) #LEAPFROG.connect_UAV(connection_string, True)
 
+print("Checking if waypoints are defined:")
 File_1_exists = LEAPFROG.DefineWaypoints('phase_1.csv')
 File_2_exists = LEAPFROG.DefineWaypoints('leap-frog_simpleauto_v3.csv')
 
-global mode_currrent
-mode_current = LEAPFROG.vehicle.mode.name
-print(mode_current)
+print("Getting current mode")
+mode_current = LEAPFROG.getMode()
+time.sleep(2)
+print("The current mode is: %s" % mode_current)
 
 # add listeners
 LEAPFROG.vehicle.add_attribute_listener('mode', LEAPFROG.mode_callback)
@@ -47,9 +61,11 @@ while True:
     if userInput == 'y':
         MISSIONSTART = True
         print("Starting Mission!!!")    
+        time.sleep(5) # -- safety delay 
         break
     else:
         break
+    
     
 ##########################################
 """
@@ -60,9 +76,9 @@ PHASE 1: Take-off and Loiter
 """
 if MISSIONSTART == True:
     LEAPFROG.vehicle.parameters['Q_GUIDED_MODE'] = 1
-    TargetAltitude = 20 # -- target altitude for initial UAV takeoff
+    takeoff_alt = 20 
     LEAPFROG.arm()
-    LEAPFROG.takeoff(TargetAltitude)
+    LEAPFROG.takeoff(takeoff_alt)
     time.sleep(1)
     #LEAPFROG.changeMode("LOITER")
     #time.sleep(10)

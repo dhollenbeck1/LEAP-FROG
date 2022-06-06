@@ -17,6 +17,8 @@ import os.path
 import csv
 import math
 
+global mode_currrent, mode_target
+
 # -- define a UAV class
 class UAV:
 
@@ -38,8 +40,8 @@ class UAV:
 
             # -- inform the user that the waypoints have been defined if list is not empty   
             if self.wp is not None:
-                print("Waypoints defined")
-                print(self.wp[0]) # -- print out the waypoints
+                print("Waypoints defined: %s" % waypointsFile)
+                #print(self.wp) # -- print out waypoints for debugging
                 File_exists = True
 
             return File_exists
@@ -81,7 +83,10 @@ class UAV:
         print("Arming motors")
 
         # -- UAV should arm in GUIDED mode
-        self.vehicle.mode = VehicleMode("GUIDED")
+        #self.vehicle.mode = VehicleMode("GUIDED")
+        self.setMode("GUIDED")
+        time.sleep(1)
+        print("mode changed to: %s" % self.getMode())
         self.vehicle.armed = True
 
         print("UAV successfully armed!") 
@@ -194,7 +199,8 @@ class UAV:
 
     def QRTL(self):
         print("Returning to Launch")
-        self.vehicle.mode = VehicleMode("QRTL")
+        #self.vehicle.mode = VehicleMode("QRTL")
+        self.setMode("QRTL")
 
         # -- Before closing the vehicle, make sure that the drone landed
         while True:
@@ -207,16 +213,33 @@ class UAV:
                 print("UAV successfully landed back at launch")
                 break
             
-    def changeMode(self,newMode):
+    def getMode(self):
+        global mode_current
+        mode_current = "VehicleMode:" + self.vehicle.mode.name
+        return mode_current
+    
+    def setMode(self,newMode):
+        global mode_target, mode_current
         self.vehicle.mode = VehicleMode(newMode)
+        mode_target = "VehicleMode:" + newMode
+        mode_current = mode_target
+        
+    def compareMode(self,mode_current):
+        global mode_target
+        print("Mode target: %s, Mode current: %s" % (mode_target, mode_current))
+        if (mode_current == mode_target):
+            return 1
+        else:
+            print("Mode mismatch")
+            return 0          
         
     def mode_callback(self, attr_name, msg, msg2):
-        global mode_currrent
+        global mode_current
         mode_current = msg2
         print("The current mode is: %s" % mode_current)
-    #def removeListener_mode(self):
-        
-        
+        self.compareMode(mode_current)
+    
+    #def removeListener_mode(self):           
 
     def close_drone(self):
         self.vehicle.close()
