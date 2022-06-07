@@ -42,11 +42,15 @@ LEAPFROG.connect_UAV('tcp:127.0.0.1:5762', True) #LEAPFROG.connect_UAV(connectio
 
 print("Checking if waypoints are defined:")
 File_1_exists = LEAPFROG.DefineWaypoints('phase_1.csv')
-File_2_exists = LEAPFROG.DefineWaypoints('leap-frog_simpleauto_v3.csv')
+File_2_exists = LEAPFROG.DefineWaypoints('phase_2.csv')
+File_3_exists = LEAPFROG.DefineWaypoints('phase_3.csv')
+File_4_exists = LEAPFROG.DefineWaypoints('phase_4.csv')
+File_5_exists = LEAPFROG.DefineWaypoints('phase_5.csv')
+File_6_exists = LEAPFROG.DefineWaypoints('phase_6.csv')
 
 print("Getting current mode")
 mode_current = LEAPFROG.getMode()
-time.sleep(2)
+time.sleep(1)
 print("The current mode is: %s" % mode_current)
 
 # add listeners
@@ -76,7 +80,6 @@ PHASE 1: Take-off and Loiter
 """
 if MISSIONSTART == True:
     LEAPFROG.vehicle.parameters['Q_GUIDED_MODE'] = 1
-    takeoff_alt = 20 
     LEAPFROG.arm()
     LEAPFROG.takeoff(takeoff_alt)
     time.sleep(1)
