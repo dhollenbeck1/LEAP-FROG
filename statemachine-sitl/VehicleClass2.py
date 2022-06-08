@@ -178,8 +178,12 @@ class UAV:
     # -- function for landing the UAV and closing the simulation
     def land(self):
         # -- return to initial launch site
-        self.QRTL()
-        
+        self.QRTL()       
+        # -- Control input (rangefinder change from max 700cm)
+        # -- Control output (lat and lon pos, alt doesnt change from current)    
+        # -- turn on rangefinder listener
+        # -- run obstacle avoidance
+        # -- turn off rangefinder listener
         # -- Close vehicle object before exiting script
         self.close_drone()
 

@@ -89,8 +89,7 @@ if MISSIONSTART == True:
 ##########################################
 """
 PHASE 2:
-    Move to control
-"""
+    Move to control handoff point
 
 
 ##########################################
