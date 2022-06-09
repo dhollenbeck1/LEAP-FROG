@@ -12,6 +12,7 @@ Import libraries
 """
 import VehicleClass2
 import time
+
 #import dronekit_sitl
 #sitl = dronekit_sitl.start_default()
 #connection_string = sitl.connection_string()
@@ -27,6 +28,9 @@ global takeoff_alt # -- target altitude for initial UAV takeoff
 takeoff_alt = 20 
 mode_current = "VehicleMode:Default"
 mode_target = "VehicleMode:GUIDED"
+last_rangefinder_distance=0
+# last_rangefinder1_distance=0
+# last_rangefinder2_distance=0
 
 ##########################################
 """
@@ -55,7 +59,9 @@ print("The current mode is: %s" % mode_current)
 
 # add listeners
 LEAPFROG.vehicle.add_attribute_listener('mode', LEAPFROG.mode_callback)
-
+LEAPFROG.vehicle.add_attribute_listener('rangerfinder', LEAPFROG.rangefinder_callback)
+# LEAPFROG.vehicle.add_attribute_listener('rangerfinder1', LEAPFROG.rangefinder1_callback)
+# LEAPFROG.vehicle.add_attribute_listener('rangerfinder2', LEAPFROG.rangefinder2_callback)
 # Flight params
 MISSIONSTART = False
 

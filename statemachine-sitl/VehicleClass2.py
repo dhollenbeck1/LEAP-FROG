@@ -16,7 +16,7 @@ import time
 import os.path
 import csv
 import math
-
+import obstacleAvoidance
 global mode_current, mode_target
 
 # -- define a UAV class
@@ -183,9 +183,51 @@ class UAV:
         # -- Control output (lat and lon pos, alt doesnt change from current)    
         # -- turn on rangefinder listener
         # -- run obstacle avoidance
+        OV_enable_flag, OV_done_flag = obstacleAvoidance.main_workflow(mode_current)
+
+        if OV_done_flag and not OV_enable_flag:
+            print('Obstacle avoidance has been done successfully')
+            # Implementing landing procedures
+            # ---
         # -- turn off rangefinder listener
+        else:
+            print('Obstacle avoidance is not successful and we cannot land here')
+            # Stop landing and do hovering immediately
+            # ---
         # -- Close vehicle object before exiting script
         self.close_drone()
+
+        
+    # I don't recommend to use call_back function to monitoring the rangefinder sensor,
+    # Since attributes which reflect vehicle “state” are only updated when their values change,
+    # rangefinder sensor value is going to change rapidly which going to be chaos.
+    def rangefinder_callback(self):
+        #attr_name not used here.
+        global last_rangefinder_distance       
+        if last_rangefinder_distance == round(self.vehicle.rangefinder.distance, 1):
+             return
+        last_rangefinder_distance = round(self.vehicle.rangefinder.distance, 1)
+        print("Rangefinder2 (metres): %s" % last_rangefinder_distance)
+        return last_rangefinder_distance
+
+    #@vehicle.on_attribute('rangefinder1')
+    # def rangefinder1_callback(self):
+    #     #attr_name not used here.
+    #     global last_rangefinder1_distance
+    #     if last_rangefinder1_distance == round(self.vehicle.rangefinder.distance, 1):
+    #          return
+    #     last_rangefinder1_distance = round(self.vehicle.rangefinder.distance, 1)
+    #     print("Rangefinder1 (metres): %s" % last_rangefinder1_distance)
+        
+        
+    # def rangefinder2_callback(self):
+    #     #attr_name not used here.
+    #     global last_rangefinder2_distance
+        
+    #     if last_rangefinder2_distance == round(self.vehicle.rangefinder.distance, 1):
+    #          return
+    #     last_rangefinder2_distance = round(self.vehicle.rangefinder.distance, 1)
+    #     print("Rangefinder2 (metres): %s" % last_rangefinder2_distance)
 
     # -- this function will get the distance between the UAV to the waypoint
     def get_distance_metres(self):
