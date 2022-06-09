@@ -77,8 +77,7 @@ class UAV:
 
         print("Arming motors")
 
-        # -- UAV should arm in GUIDED mode
-        self.vehicle.mode = VehicleMode("GUIDED")
+        self.guided()
         self.vehicle.armed = True
 
         print("UAV successfully armed!") 
@@ -196,6 +195,17 @@ class UAV:
                 print("UAV successfully landed back at launch")
                 break
 
+    # -- function to set the drone vehicle mode into loiter
+    def loiter(self, time):
+        print("Putting vehicle into loiter mode.")
+        self.vehicle.mode = VehicleMode("LOITER")
+        time.sleep(time) # -- wait 0.5s to make sure that vehicle is in loiter mode
+
+    def guided(self):
+        # -- UAV should arm in GUIDED mode
+        self.vehicle.mode = VehicleMode("GUIDED")
+
+    # -- function used to close out the drone safely
     def close_drone(self):
         self.vehicle.close()
         print("Mission completed")
