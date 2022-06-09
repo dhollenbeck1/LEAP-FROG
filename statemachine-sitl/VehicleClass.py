@@ -201,7 +201,7 @@ class UAV:
         self.vehicle.mode = VehicleMode("LOITER")
         time.sleep(time) # -- wait 0.5s to make sure that vehicle is in loiter mode
 
-    def guided(self):
+    def guided_mode(self):
         # -- UAV should arm in GUIDED mode
         self.vehicle.mode = VehicleMode("GUIDED")
 
