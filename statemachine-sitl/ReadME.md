@@ -1,6 +1,7 @@
 # ReadME
 ## Python file name and description
 ### UAV class
+--------------------------------------------------------------------------------------------
 1. **VehicleClass.py**
     - UAV class written generically for any drone using dronekit
     - *Note: Requires additional development*
