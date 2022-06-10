@@ -47,7 +47,7 @@ if File_exists1:
 
     # -- begin the first waypoint navigation
     airspeed = 3
-    groundspeed = 10
+    groundspeed = 50
     LEAPFROG.Waypoint_Travel(airspeed, groundspeed)
 
     # -- mark this portion of the navigation as completed
@@ -60,18 +60,18 @@ File_exists2 = LEAPFROG.DefineWaypoints('mission_plan/waypoints2.csv')
 # -- before even running the simulation or flying the drone
 # -- check if the file exists or waypoints are defined in mission planner
 if portion1_completed and File_exists2:
-    loiter_time = 15 # -- loiter time in seconds
+    loiter_time = 60 # -- loiter time in seconds
     LEAPFROG.loiter(loiter_time)
 
     # -- Once the drone has completed the loiter time
     # -- Enable the drone into guided mode
     LEAPFROG.setMode("GUIDED")
+    LEAPFROG.vehicle.parameters['Q_GUIDED_MODE'] = 1
 
     # -- begin the next waypoint navigation
-    airspeed = 3
-    groundspeed = 10
+    airspeed = 26
+    groundspeed = 26
     LEAPFROG.Waypoint_Travel(airspeed, groundspeed)
-
 
 # -- Safely land the UAV
 LEAPFROG.land()

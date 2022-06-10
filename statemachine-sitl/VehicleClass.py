@@ -82,6 +82,7 @@ class UAV:
         print("Arming motors")
 
         self.setMode("GUIDED")
+        self.vehicle.parameters['Q_GUIDED_MODE'] = 1
         self.vehicle.armed = True
 
         print("UAV successfully armed!") 
@@ -92,6 +93,7 @@ class UAV:
         print("Checking to confirm UAV has been armed successfully")
         while not self.vehicle.armed:
             print(" Waiting for arming...")
+            #self.vehicle.armed = True
             time.sleep(1)
 
         print("UAV arming confirmed. Taking off!")
@@ -128,6 +130,8 @@ class UAV:
         # -- begin the counter for waypoint number
         self.wp_number = 0
         self.radius = 90.0 # -- in meters
+        self.vehicle.parameters['Q_WP_RADIUS'] = 10
+        self.kr = 0.0002
 
         # -- begin looping through all waypoints
         while True:
@@ -136,25 +140,53 @@ class UAV:
                                                         self.wp[self.wp_number][8], \
                                                         self.wp[self.wp_number][9]))
 
+            # -- in this instance of the function call, we are using the other values
+            # -- self.dlat, self.dlong and self.norm to calcuate a virtual point for the 
+            # -- drone to fly to so that the drone does not slow down in the air, This reduces battery waste
+            self.get_distance_metres()
+            self.virtual_wp = (float(self.wp[self.wp_number][8]) + (self.dlat + self.kr*(self.dlat/self.norm)),\
+                               float(self.wp[self.wp_number][9]) + (self.dlong + self.kr*(self.dlong/self.norm)))
+
+            #print(len(self.virtual_wp))
+
             # -- send the UAV the coordinates of the waypoint wanting to travel to
-            point = LocationGlobalRelative(float(self.wp[self.wp_number][8]), \
-                                            float(self.wp[self.wp_number][9]), \
-                                            float(self.wp[self.wp_number][10]))
+            #point = LocationGlobalRelative(float(self.wp[self.wp_number][8]), \
+            #                                float(self.wp[self.wp_number][9]), \
+            #                                float(self.wp[self.wp_number][10]))
+
+            # -- send the UAV the coordinates of the waypoint wanting to travel to
+            point = LocationGlobalRelative(self.virtual_wp[0], \
+                                            self.virtual_wp[1], \
+                                            float(self.wp[self.wp_number][10]))                                
             self.vehicle.simple_goto(point, self.vehicle.groundspeed)
+
+            # -- previous distance
+            self.previous_dist = self.distance_to_wp
             
             # -- continue looping until UAV meets the waypoint
             while True:
                 # -- get the distance to the waypoint
-                self.distance_to_wp = self.get_distance_metres()
+                self.previous_dist = self.distance_to_wp
+
+                # -- used to slow down the printing of the distance from waypoint
+                time.sleep(0.25)
+
+                self.get_distance_metres()
+                self.virtual_wp = (float(self.wp[self.wp_number][8]) + (self.dlat + self.kr*(self.dlat/self.norm)),\
+                                   float(self.wp[self.wp_number][9]) + (self.dlong + self.kr*(self.dlong/self.norm)))
+
+                # -- send the UAV the coordinates of the waypoint wanting to travel to
+                point = LocationGlobalRelative(self.virtual_wp[0], \
+                                               self.virtual_wp[1], \
+                                               float(self.wp[self.wp_number][10]))    
+
+                self.vehicle.simple_goto(point, self.vehicle.groundspeed)
                 print("Distance to waypoint %s: %s m" % (self.wp_number, self.distance_to_wp))
 
                 # -- if the UAV is within the waypoint tolerance, move to the next waypoint
                 if self.distance_to_wp < self.radius:
                     self.wp_number = self.wp_number + 1
                     break
-                
-                # -- used to slow down the printing of the distance from waypoint
-                time.sleep(0.25)
 
             # -- check if the UAV reached the last waypoint within tolerance
             # -- if yes, end the waypoint traversal
@@ -180,9 +212,10 @@ class UAV:
         https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
         """
         # -- calculate the dlat and dlon of the current position to the waypoint
-        dlat = self.vehicle.location.global_relative_frame.lat - float(self.wp[self.wp_number][8])
-        dlong = self.vehicle.location.global_relative_frame.lon - float(self.wp[self.wp_number][9])
-        return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
+        self.dlat = float(self.wp[self.wp_number][8]) - self.vehicle.location.global_relative_frame.lat
+        self.dlong = float(self.wp[self.wp_number][9]) - self.vehicle.location.global_relative_frame.lon
+        self.norm = math.sqrt((self.dlat*self.dlat) + (self.dlong*self.dlong))
+        self.distance_to_wp = self.norm * 1.113195e5
 
     def QRTL(self):
         print("Returning to Launch")
@@ -203,6 +236,7 @@ class UAV:
     def loiter(self, loiter_time):
         print("Putting vehicle into loiter mode.")
         self.setMode("LOITER")
+        self.vehicle.parameters['WP_LOITER_RAD'] = 120
         time.sleep(loiter_time) # -- wait 0.5s to make sure that vehicle is in loiter mode
 
     # -- function used to close out the drone safely
