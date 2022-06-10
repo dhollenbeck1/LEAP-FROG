@@ -2,9 +2,11 @@
 ## Python file name and description
 1. **VehicleClass.py**
     - UAV class written generically for any drone using dronekit
+    - *Note: Requires additional development*
 2. **VehicleClass2.py**
     - UAV class written generically for any drone using dronekit
     - The class has the initial obstacle avoidance implemented
+    - *Note: Requires additional development*
 3. **TestScript_v0.py**
     - used for testing the functionality of VehicleClass.py 
     - structured for basic flight patterns with current waypoint mission based in Illinois 
