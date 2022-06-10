@@ -1,5 +1,6 @@
 # ReadME
 ## Python file name and description
+### UAV class
 1. **VehicleClass.py**
     - UAV class written generically for any drone using dronekit
     - *Note: Requires additional development*
@@ -7,13 +8,15 @@
     - UAV class written generically for any drone using dronekit
     - The class has the initial obstacle avoidance implemented
     - *Note: Requires additional development*
-3. **TestScript_v0.py**
+
+### Test scripts
+1. **TestScript_v0.py**
     - used for testing the functionality of VehicleClass.py 
     - structured for basic flight patterns with current waypoint mission based in Illinois 
-4. **TestScript_v1.py**
+2. **TestScript_v1.py**
     - used for testing the functionality of VehicleClass.py  
     - structured for a more comprehensive mission planning  
-5. **TestScript_v2.1.py**
+3. **TestScript_v2.1.py**
     - used for a basic flight plan that only allows the drone to takeoff, hover then land  
-6. **TestScript_v2.2.py**
+4. **TestScript_v2.2.py**
     - used for the first complex flight plan with a loiter  
