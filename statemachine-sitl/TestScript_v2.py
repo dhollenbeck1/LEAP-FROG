@@ -4,7 +4,13 @@ Created on Thursday June 9th, 2022
 @author: Rafal Krzysiak
 
 This script will test the VehicleClass script with mission planner
-used for the maiden flight of LEAPFROG
+used for the maiden flight of LEAPFROG.
+
+The dronekit maiden flight test is a single phase survey however, 
+the single phase is broken up into sections.
+The drone will take off and then begin a waypoint navigation
+Once completing a portion of the waypoint navigation, the drone will then
+be placed into loiter mode for some time. After the time is 
 """
 
 # -- import required libraries
@@ -15,7 +21,7 @@ LEAPFROG = VehicleClass.UAV()
 
 # -- read waypoints txt file and define whether or not you will 
 # -- implement a waypoint path from a csv file
-File_exists1 = LEAPFROG.DefineWaypoints('waypoints.csv')
+File_exists1 = LEAPFROG.DefineWaypoints('mission_plan/waypoints1.csv')
 
 # -- initialize the first portion of the waypoint navigation
 # -- as incomplete. This boolen will determine whether or not
@@ -35,6 +41,7 @@ if File_exists1:
 
     # -- arm and let the UAV takeoff
     TargetAltitude = 10 # -- target altitude for initial UAV takeoff
+    LEAPFROG.getMode()
     LEAPFROG.arm()
     LEAPFROG.takeoff(TargetAltitude)
 
@@ -48,17 +55,17 @@ if File_exists1:
 
 # -- once the first half of the survey is completed
 # -- just prior to the loiter, load up the new waypoints
-File_exists2 = LEAPFROG.DefineWaypoints('waypoints.csv')
+File_exists2 = LEAPFROG.DefineWaypoints('mission_plan/waypoints2.csv')
 
 # -- before even running the simulation or flying the drone
 # -- check if the file exists or waypoints are defined in mission planner
 if portion1_completed and File_exists2:
-    loiter_time = 5 # -- loiter time in seconds
+    loiter_time = 15 # -- loiter time in seconds
     LEAPFROG.loiter(loiter_time)
 
     # -- Once the drone has completed the loiter time
     # -- Enable the drone into guided mode
-    LEAPFROG.guided()
+    LEAPFROG.setMode("GUIDED")
 
     # -- begin the next waypoint navigation
     airspeed = 3

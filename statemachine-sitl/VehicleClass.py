@@ -29,9 +29,13 @@ class UAV:
             wpFile = open(waypointsFile, 'r')
             wpReader = csv.reader(wpFile, delimiter=',')
 
+            # -- we want to know the number of rows that are present in the waypoint file
+            self.num_wps = 0
+
             # -- get the rows of the file and append them to a list
             for row in wpReader:
                 self.wp.append(row)
+                self.num_wps = self.num_wps + 1
 
             # -- inform the user that the waypoints have been defined if list is not empty   
             if self.wp is not None:
@@ -77,7 +81,7 @@ class UAV:
 
         print("Arming motors")
 
-        self.guided()
+        self.setMode("GUIDED")
         self.vehicle.armed = True
 
         print("UAV successfully armed!") 
@@ -122,7 +126,7 @@ class UAV:
         self.waypoint_met = False
 
         # -- begin the counter for waypoint number
-        self.wp_number = 1
+        self.wp_number = 0
         self.radius = 90.0 # -- in meters
 
         # -- begin looping through all waypoints
@@ -154,7 +158,7 @@ class UAV:
 
             # -- check if the UAV reached the last waypoint within tolerance
             # -- if yes, end the waypoint traversal
-            if self.distance_to_wp < self.radius and self.wp_number == 6:
+            if self.distance_to_wp < self.radius and self.wp_number == self.num_wps:
                 MissionFinished = True
                 break
 
@@ -196,16 +200,22 @@ class UAV:
                 break
 
     # -- function to set the drone vehicle mode into loiter
-    def loiter(self, time):
+    def loiter(self, loiter_time):
         print("Putting vehicle into loiter mode.")
-        self.vehicle.mode = VehicleMode("LOITER")
-        time.sleep(time) # -- wait 0.5s to make sure that vehicle is in loiter mode
-
-    def guided_mode(self):
-        # -- UAV should arm in GUIDED mode
-        self.vehicle.mode = VehicleMode("GUIDED")
+        self.setMode("LOITER")
+        time.sleep(loiter_time) # -- wait 0.5s to make sure that vehicle is in loiter mode
 
     # -- function used to close out the drone safely
     def close_drone(self):
         self.vehicle.close()
         print("Mission completed")
+
+    # -- this function will be used to change the mode of the drone
+    def setMode(self, newMode):
+        self.vehicle.mode = VehicleMode(newMode)
+        self.mode_target = "VehicleMode: " + newMode
+        self.mode_current = self.mode_target
+
+    # -- this function will be used to get the current mode of the drone
+    def getMode(self):
+        self.mode_current = "VehicleMode: " + self.vehicle.mode.name

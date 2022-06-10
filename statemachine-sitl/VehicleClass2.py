@@ -264,13 +264,13 @@ class UAV:
         mode_current = "VehicleMode:" + self.vehicle.mode.name
         return mode_current
     
-    def setMode(self,newMode):
+    def setMode(self, newMode):
         global mode_target, mode_current
         self.vehicle.mode = VehicleMode(newMode)
         mode_target = "VehicleMode:" + newMode
         mode_current = mode_target
         
-    def compareMode(self,mode_current):
+    def compareMode(self, mode_current):
         global mode_target
         #print("Mode target: %s, Mode current: %s" % (mode_target, mode_current))
         #print(str(mode_current)==mode_target)
