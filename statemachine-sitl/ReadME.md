@@ -1,10 +1,9 @@
 # ReadME
 ## Python file name and description
 ### UAV class
---------------------------------------------------------------------------------------------
 1. **VehicleClass.py**
-    - UAV class written generically for any drone using dronekit
-    - *Note: Requires additional development*
+- UAV class written generically for any drone using dronekit
+- *Note: Requires additional development*
 2. **VehicleClass2.py**
     - UAV class written generically for any drone using dronekit
     - The class has the initial obstacle avoidance implemented
