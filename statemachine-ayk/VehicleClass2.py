@@ -88,8 +88,8 @@ class UAV:
         print("====================================================================================")
 
     # -- function to initialize the connection between the drone and mission planner
-    def connect_UAV(self, ip, wait_ready):
-        self.vehicle = connect(ip,True,"baud=921600")
+    def connect_UAV(self, ip):
+        self.vehicle = connect(ip,wait_ready=True,baud=921600)
 
     # -- get the state of the UAV
     def get_state(self):
