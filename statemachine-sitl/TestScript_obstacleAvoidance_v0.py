@@ -34,15 +34,14 @@ PHASE 0: Start Program (initialization)
 """
 
 LEAPFROG = VehicleClass2.UAV()
-
 LEAPFROG.connect_UAV('tcp:127.0.0.1:5762', True) #LEAPFROG.connect_UAV(connection_string, True)
 
 # get current location (HOME)
 LEAPFROG.get_curPosition()
  
 # set fake obstacle for testing at 2m alt
-LEAPFROG.obs_lat = LEAPFROG.cur_lat + 0.0001 
-LEAPFROG.obs_lon = LEAPFROG.cur_lon + 0.0001
+LEAPFROG.obs_lat = LEAPFROG.cur_lat + 0.00005 
+LEAPFROG.obs_lon = LEAPFROG.cur_lon + 0.00005
 LEAPFROG.obs_alt = LEAPFROG.cur_alt + 2 
 
 print("Checking if waypoints are defined:")

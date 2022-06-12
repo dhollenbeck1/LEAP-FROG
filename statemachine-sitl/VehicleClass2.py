@@ -35,8 +35,8 @@ class UAV:
         self.obs_lat = 0
         self.obs_lon = 0
         self.obs_alt = 0
-        self.threshold_dist = 10
-        self.gain_oa = 0.1
+        self.threshold_dist = 0.0001
+        self.gain_oa = 0.0001
         self.obs_dlat = 100
         self.obs_dlon = 100
         self.obs_dalt = 100
@@ -287,12 +287,12 @@ class UAV:
         self.obs_dlon = self.obs_lon - self.vehicle.location.global_relative_frame.lon
         self.obs_dalt = self.obs_alt - self.vehicle.location.global_relative_frame.alt
         return math.sqrt(((self.obs_dlat*self.obs_dlat) + \
-                          (self.obs_dlon*self.obs_dlon)) * 1.113195e5 + \
-                         self.obs_dalt*self.obs_dalt)
+                          (self.obs_dlon*self.obs_dlon)))
+                         #self.obs_dalt*self.obs_dalt)1.113195e5
             
     def get_curPosition(self):
         self.cur_lat = float(self.vehicle.location.global_relative_frame.lat)
-        self.cur_lon =float( self.vehicle.location.global_relative_frame.lon)
+        self.cur_lon = float( self.vehicle.location.global_relative_frame.lon)
         self.cur_alt = float(self.vehicle.location.global_relative_frame.alt)
         print("current position: %s, %s, %s" % (self.cur_lat,self.cur_lon,self.cur_alt))
         
@@ -300,35 +300,37 @@ class UAV:
         #print("vehicle mode: %s" % self.vehicle.mode.name)
         
         # Check if we are in QRTL and vehicle speed is less than 2m/s
-        if self.vehicle.mode.name == 'QRTL' and self.vehicle.groundspeed < 2:
+        if (self.vehicle.mode.name == 'QRTL' or self.vehicle.mode.name == 'QLAND') and self.vehicle.groundspeed < 2:
             cur_obs_dist = self.get_obs_distance_metres()
             print("distance to obstacle: %s" % cur_obs_dist)
-            while True:
-                if cur_obs_dist < self.threshold_dist: 
-                    self.setMode("GUIDED")
-                    self.control_lat = 1 * self.gain_oa * (self.threshold_dist - self.obs_dlat * 1.113195e5)
-                    self.control_lon = 1 * self.gain_oa * (self.threshold_dist - self.obs_dlon * 1.113195e5)
-                    print("obstacle detected...control output: %s, %s" % (self.control_lat,self.control_lon))
-                    cur_obs_dist = self.get_obs_distance_metres()
-                    print("distance to obstacle: %s" % cur_obs_dist)
-                    self.get_curPosition()
-                    self.tar_lat = self.cur_lat + self.control_lat
-                    self.tar_lon = self.cur_lon + self.control_lon
-                    self.tar_alt = self.cur_alt
-                    
-                    
-                    # -- Set mode to GUIDED and go to new control point before returning to QRTL()
-                    point = LocationGlobalRelative(float(self.tar_lat), \
-                                                   float(self.tar_lon), \
-                                                float(self.tar_alt))
-                    self.vehicle.simple_goto(point, self.obs_speed)
-                    
-                    time.sleep(1)
-                    #cur_obs_dist = self.get_obs_distance_metres()
-                else:
-                    break
-                    self.setMode("QLAND")
-                    print("Object avoided")
+            if cur_obs_dist < self.threshold_dist: 
+                while True:
+                    if cur_obs_dist < self.threshold_dist: 
+                        self.setMode("GUIDED")
+                        self.control_lat = -1 * self.gain_oa * (self.threshold_dist - self.obs_dlat)
+                        self.control_lon = -1 * self.gain_oa * (self.threshold_dist - self.obs_dlon)
+                        print("obstacle detected...control output: %s, %s" % (self.control_lat,self.control_lon))
+                        cur_obs_dist = self.get_obs_distance_metres()
+                        print("distance to obstacle: %s" % cur_obs_dist)
+                        self.get_curPosition()
+                        self.tar_lat = self.cur_lat + self.control_lat
+                        self.tar_lon = self.cur_lon + self.control_lon
+                        self.tar_alt = self.cur_alt
+                        
+                        
+                        # -- Set mode to GUIDED and go to new control point before returning to QRTL()
+                        point = LocationGlobalRelative(float(self.tar_lat), \
+                                                       float(self.tar_lon), \
+                                                    float(self.tar_alt))
+                        self.vehicle.simple_goto(point, self.obs_speed)
+                        
+                        time.sleep(0.5)
+                        #cur_obs_dist = self.get_obs_distance_metres()
+                    else:
+                        self.setMode("QLAND")
+                        print("Object avoided")
+                        break
+            
 
     def QRTL(self):
         print("Returning to Launch")
