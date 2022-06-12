@@ -16,7 +16,7 @@ import time
 import os.path
 import csv
 import math
-import obstacleAvoidance
+#import obstacleAvoidance
 
 # -- define a UAV class
 class UAV:
