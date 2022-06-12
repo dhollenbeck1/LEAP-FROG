@@ -17,10 +17,32 @@ import os.path
 import csv
 import math
 import obstacleAvoidance
-global mode_current, mode_target
 
 # -- define a UAV class
 class UAV:
+    
+    oa_type = 2
+    takeoff_alt = 20 
+    mode_current = "VehicleMode:Default"
+    mode_target = "VehicleMode:GUIDED"
+    last_rangefinder_distance=0
+    cur_lat = 0
+    cur_lon = 0
+    cur_alt = 0
+    obs_lat = 0
+    obs_lon = 0
+    obs_alt = 0
+    threshold_dist = 10
+    gain_oa = 0.0001
+    obs_dlat = 100
+    obs_dlon = 100
+    obs_dalt = 100
+    control_lat = 0
+    control_lon = 0
+    control_alt = 0
+    tar_lat = 0
+    tar_lon = 0
+    tar_alt = 0
 
     # -- define waypoints for drone
     def DefineWaypoints(self, waypointsFile):
@@ -183,32 +205,37 @@ class UAV:
         # -- Control output (lat and lon pos, alt doesnt change from current)    
         # -- turn on rangefinder listener
         # -- run obstacle avoidance
-        OV_enable_flag, OV_done_flag = obstacleAvoidance.main_workflow(mode_current)
-
-        if OV_done_flag and not OV_enable_flag:
-            print('Obstacle avoidance has been done successfully')
-            # Implementing landing procedures
-            # ---
-        # -- turn off rangefinder listener
+        
+        if self.oa_type == 1:
+            OV_enable_flag, OV_done_flag = obstacleAvoidance.main_workflow(self.mode_current)
+            if OV_done_flag and not OV_enable_flag:
+                print('Obstacle avoidance has been done successfully')
+                # Implementing landing procedures
+                # ---
+            # -- turn off rangefinder listener
+            else:
+                print('Obstacle avoidance is not successful and we cannot land here')
+                # Stop landing and do hovering immediately
+                # ---
         else:
-            print('Obstacle avoidance is not successful and we cannot land here')
-            # Stop landing and do hovering immediately
-            # ---
+            if self.oa_type == 2:
+                self.simpleObstacleAvoidance
+            
         # -- Close vehicle object before exiting script
         self.close_drone()
+        
 
         
     # I don't recommend to use call_back function to monitoring the rangefinder sensor,
     # Since attributes which reflect vehicle “state” are only updated when their values change,
     # rangefinder sensor value is going to change rapidly which going to be chaos.
     def rangefinder_callback(self):
-        #attr_name not used here.
-        global last_rangefinder_distance       
-        if last_rangefinder_distance == round(self.vehicle.rangefinder.distance, 1):
+        #attr_name not used here.      
+        if self.last_rangefinder_distance == round(self.vehicle.rangefinder.distance, 1):
              return
-        last_rangefinder_distance = round(self.vehicle.rangefinder.distance, 1)
-        print("Rangefinder2 (metres): %s" % last_rangefinder_distance)
-        return last_rangefinder_distance
+        self.last_rangefinder_distance = round(self.vehicle.rangefinder.distance, 1)
+        print("Rangefinder2 (metres): %s" % self.last_rangefinder_distance)
+        return self.last_rangefinder_distance
 
     #@vehicle.on_attribute('rangefinder1')
     # def rangefinder1_callback(self):
@@ -229,6 +256,7 @@ class UAV:
     #     last_rangefinder2_distance = round(self.vehicle.rangefinder.distance, 1)
     #     print("Rangefinder2 (metres): %s" % last_rangefinder2_distance)
 
+
     # -- this function will get the distance between the UAV to the waypoint
     def get_distance_metres(self):
         """
@@ -243,6 +271,37 @@ class UAV:
         dlong = self.vehicle.location.global_relative_frame.lon - float(self.wp[self.wp_number][9])
         return math.sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5
 
+    def get_obs_distance_metres(self):
+        """
+        Returns the ground distance in metres between two `LocationGlobal` or `LocationGlobalRelative` objects.
+
+        This method is an approximation, and will not be accurate over large distances and close to the
+        earth's poles. It comes from the ArduPilot test code:
+        https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
+        """      
+        # -- calculate the dlat and dlon of the current position to the waypoint
+        self.obs_dlat =  self.obs_lat - self.vehicle.location.global_relative_frame.lat
+        self.obs_dlon = self.obs_lon - self.vehicle.location.global_relative_frame.lon
+        self.obs_dalt =  self.obs_alt - self.vehicle.location.global_relative_frame.alt
+        return math.sqrt(((self.obs_dlat*self.obs_dlat) + \
+                          (self.obs_dlon*self.obs_dlon)) * 1.113195e5 + \
+                         self.obs_dalt*self.obs_dalt)
+        
+    def simpleObstacleAvoidance(self):   
+        #print("vehicle mode: %s" % self.vehicle.mode.name)
+        
+        # Check if we are in QRTL and vehicle speed is less than 2m/s
+        if self.vehicle.mode.name == 'QRTL' and self.vehicle.groundspeed < 2:
+            cur_obs_dist = self.get_obs_distance_metres()
+            print("distance to obstacle: %s" % cur_obs_dist)
+            if cur_obs_dist < self.threshold_dist:
+                print("obstacle detected...")
+                #self.setMode("GUIDED")
+                self.control_lat = -self.gain_oa * self.obs_dlat
+                self.control_lon = -self.gain_oa * self.obs_dlon
+                
+                            
+
     def QRTL(self):
         print("Returning to Launch")
         #self.vehicle.mode = VehicleMode("QRTL")
@@ -251,7 +310,7 @@ class UAV:
         # -- Before closing the vehicle, make sure that the drone landed
         while True:
             print(" Altitude: %s m" % self.vehicle.location.global_relative_frame.alt)
-
+            self.simpleObstacleAvoidance()
             time.sleep(1) # -- slow the printing of the altitude of the drone
 
             # -- Break the loop when the drone lands within some threshold.
@@ -260,23 +319,20 @@ class UAV:
                 break
             
     def getMode(self):
-        global mode_current
-        mode_current = "VehicleMode:" + self.vehicle.mode.name
-        return mode_current
+        self.mode_current = "VehicleMode:" + self.vehicle.mode.name
+        return self.mode_current
     
     def setMode(self, newMode):
-        global mode_target, mode_current
         self.vehicle.mode = VehicleMode(newMode)
-        mode_target = "VehicleMode:" + newMode
-        mode_current = mode_target
+        self.mode_target = "VehicleMode:" + newMode
+        self.mode_current = self.mode_target
         
     def compareMode(self, mode_current):
-        global mode_target
         #print("Mode target: %s, Mode current: %s" % (mode_target, mode_current))
         #print(str(mode_current)==mode_target)
         #print(type(mode_current))
         #print(type(mode_target))
-        if (str(mode_current) == mode_target):
+        if (str(self.mode_current) == self.mode_target):
             print("Mode Change Valid")
             return 1
         else:
@@ -284,10 +340,9 @@ class UAV:
             return 0          
         
     def mode_callback(self, attr_name, msg, msg2):
-        global mode_current
-        mode_current = msg2
-        print("The current mode is: %s" % mode_current)
-        self.compareMode(mode_current)
+        self.mode_current = msg2
+        print("The current mode is: %s" % self.mode_current)
+        self.compareMode(self.mode_current)
     
     #def removeListener_mode(self):           
 

@@ -28,7 +28,7 @@ vehicle_VTOL_mode = False
 OV_distance_threshold = 7 # in meter?
 # P controller parameter for tunning
 kp = 0.08
-LEAPFROG = VehicleClass2.UAV()
+#LEAPFROG = VehicleClass2.UAV()
 
 def check_current_mode(mode_current):
     if mode_current == 'VTOL':
