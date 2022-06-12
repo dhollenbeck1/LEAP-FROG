@@ -281,9 +281,9 @@ class UAV:
         https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
         """      
         # -- calculate the dlat and dlon of the current position to the waypoint
-        self.obs_dlat =  self.obs_lat - self.vehicle.location.global_relative_frame.lat
+        self.obs_dlat = self.obs_lat - self.vehicle.location.global_relative_frame.lat
         self.obs_dlon = self.obs_lon - self.vehicle.location.global_relative_frame.lon
-        self.obs_dalt =  self.obs_alt - self.vehicle.location.global_relative_frame.alt
+        self.obs_dalt = self.obs_alt - self.vehicle.location.global_relative_frame.alt
         return math.sqrt(((self.obs_dlat*self.obs_dlat) + \
                           (self.obs_dlon*self.obs_dlon)) * 1.113195e5 + \
                          self.obs_dalt*self.obs_dalt)
@@ -304,14 +304,14 @@ class UAV:
             while True:
                 if cur_obs_dist < self.threshold_dist: 
                     self.setMode("GUIDED")
-                    self.control_lat = -self.gain_oa * self.obs_dlat
-                    self.control_lon = -self.gain_oa * self.obs_dlon
+                    self.control_lat = 1 * self.gain_oa * (self.threshold_dist - self.obs_dlat * 1.113195e5)
+                    self.control_lon = 1 * self.gain_oa * (self.threshold_dist - self.obs_dlon * 1.113195e5)
                     print("obstacle detected...control output: %s, %s" % (self.control_lat,self.control_lon))
                     cur_obs_dist = self.get_obs_distance_metres()
                     print("distance to obstacle: %s" % cur_obs_dist)
                     self.get_curPosition()
-                    self.tar_lat = self.cur_lat - self.control_lat
-                    self.tar_lon = self.cur_lon - self.control_lon
+                    self.tar_lat = self.cur_lat + self.control_lat
+                    self.tar_lon = self.cur_lon + self.control_lon
                     self.tar_alt = self.cur_alt
                     
                     
@@ -321,7 +321,7 @@ class UAV:
                                                 float(self.tar_alt))
                     self.vehicle.simple_goto(point, self.obs_speed)
                     
-                    time.sleep(2)
+                    time.sleep(1)
                     #cur_obs_dist = self.get_obs_distance_metres()
                 else:
                     break
