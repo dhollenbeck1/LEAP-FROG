@@ -34,7 +34,7 @@ PHASE 0: Start Program (initialization)
 """
 
 LEAPFROG = VehicleClass2.UAV()
-LEAPFROG.connect_UAV('/dev/ttyAMA0',LEAPFROG.baudrate, True) #LEAPFROG.connect_UAV(connection_string, True)
+LEAPFROG.connect_UAV('/dev/ttyAMA0', True) #LEAPFROG.connect_UAV(connection_string, True)
 
 # get current location (HOME)
 LEAPFROG.get_curPosition()
