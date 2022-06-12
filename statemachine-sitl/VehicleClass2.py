@@ -46,6 +46,11 @@ class UAV:
         self.tar_lat = 0
         self.tar_lon = 0
         self.star_alt = 0
+        self.OV_distance_threshold = 7
+        self.OV_enable_flag = False
+        self.OV_done_flag = False
+        self.vehicle_VTOL_mode = False
+        self.kp = 0.08
 
     # -- define waypoints for drone
     def DefineWaypoints(self, waypointsFile):

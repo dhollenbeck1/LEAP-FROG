@@ -22,34 +22,34 @@ import math
 
 global mode_current, mode_target
 
-OV_enable_flag = False
-OV_done_flag = False
-vehicle_VTOL_mode = False
-OV_distance_threshold = 7 # in meter?
+# OV_enable_flag = False
+# OV_done_flag = False
+# vehicle_VTOL_mode = False
+#OV_distance_threshold = 7 # in meter?
 # P controller parameter for tunning
-kp = 0.08
-#LEAPFROG = VehicleClass2.UAV()
+#kp = 0.08
+LEAPFROG = VehicleClass2.UAV()
 
 def check_current_mode(mode_current):
-    if mode_current == 'VTOL':
-        vehicle_VTOL_mode = True
+    if mode_current == 'QRTL':
+        LEAPFROG.vehicle_VTOL_mode = True
     else: 
-        vehicle_VTOL_mode = False
+        LEAPFROG.vehicle_VTOL_mode = False
         print('Current UAV mode is not in VTOL, please check the vehicle mode')
         # break /should return previous state
-    return vehicle_VTOL_mode
+    return LEAPFROG.vehicle_VTOL_mode
 
 def detect_obstacles():
     if LEAPFROG.vehicle.rangefinder.voltage == True:# Not sure what are the normal voltage value and abnormal voltage value
         # listner
-        if LEAPFROG.vehicle.rangefinder.distance <= OV_distance_threshold:# distance in cm or m?
-            OV_enable_flag = True
+        if LEAPFROG.vehicle.rangefinder.distance <= LEAPFROG.OV_distance_threshold:# distance in cm or m?
+            LEAPFROG.OV_enable_flag = True
         else:
-            OV_enable_flag = False
+            LEAPFROG.OV_enable_flag = False
     else:
         print("Rangefinder Sensor Does Not Enabled, Please Check Rangefinder Sensor and Its Setup")
         # break /should return previous state
-    return OV_enable_flag
+    return LEAPFROG.OV_enable_flag
             
 # Using P controller to main hover
 def main_workflow(mode_current):
@@ -66,7 +66,7 @@ def main_workflow(mode_current):
             current_yaw = LEAPFROG.vehicle.attitude.yaw
             # Scan around from current heading position with offset 90 degrees at each time.
             # current heading
-            while obstacles_distance is not OV_distance_threshold:
+            while obstacles_distance is not LEAPFROG.OV_distance_threshold:
                 u_v = p_controller(obstacles_distance)
                 if scanLoop & 1 != 0:
                     send_global_velocity(-u_v,0)
@@ -79,14 +79,14 @@ def main_workflow(mode_current):
                 current_yaw = LEAPFROG.vehicle.attitude.yaw
                 scanLoop = scanLoop + 1
         
-        OV_done_flag = True
+        LEAPFROG.OV_done_flag = True
     else:
-        OV_enable_flag = False
-    return OV_enable_flag, OV_done_flag   
+        LEAPFROG.OV_enable_flag = False
+    return LEAPFROG.OV_enable_flag, LEAPFROG.OV_done_flag   
 
 def p_controller(obstacles_distance):
-    error = OV_distance_threshold - obstacles_distance
-    u_velocity = kp*error
+    error = LEAPFROG.OV_distance_threshold - obstacles_distance
+    u_velocity = LEAPFROG.kp*error
     return u_velocity    
 
 
