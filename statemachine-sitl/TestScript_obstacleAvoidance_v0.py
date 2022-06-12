@@ -38,9 +38,7 @@ LEAPFROG = VehicleClass2.UAV()
 LEAPFROG.connect_UAV('tcp:127.0.0.1:5762', True) #LEAPFROG.connect_UAV(connection_string, True)
 
 # get current location (HOME)
-LEAPFROG.cur_lat = float(LEAPFROG.vehicle.location.global_relative_frame.lat)
-LEAPFROG.cur_lon =float( LEAPFROG.vehicle.location.global_relative_frame.lon)
-LEAPFROG.cur_alt = float(LEAPFROG.vehicle.location.global_relative_frame.alt)
+LEAPFROG.get_curPosition()
  
 # set fake obstacle for testing at 2m alt
 LEAPFROG.obs_lat = LEAPFROG.cur_lat + 0.0001 
