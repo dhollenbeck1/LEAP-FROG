@@ -9,7 +9,6 @@ Created on Sat Jun 11 22:03:14 2022
 """
 Import libraries
 """
-from dronekit import LocationGlobalRelative
 import VehicleClass2
 import time
 
@@ -20,19 +19,9 @@ import time
 
 ##########################################
 """
-Declare Global and Local variables
+Declare Global and Local variables (if needed)
 """
-global mode_currrent, mode_target
-global takeoff_alt # -- target altitude for initial UAV takeoff
-global oa_type
 
-# oa_type = 2
-# takeoff_alt = 20 
-# mode_current = "VehicleMode:Default"
-# mode_target = "VehicleMode:GUIDED"
-# last_rangefinder_distance=0
-# last_rangefinder1_distance=0
-# last_rangefinder2_distance=0
 
 ##########################################
 """
@@ -45,20 +34,17 @@ PHASE 0: Start Program (initialization)
 """
 
 LEAPFROG = VehicleClass2.UAV()
-
-LEAPFROG.connect_UAV('tcp:127.0.0.1:5762', True) #LEAPFROG.connect_UAV(connection_string, True)
+LEAPFROG.connect_UAV('/dev/ttyAMA0',LEAPFROG.baudrate, True) #LEAPFROG.connect_UAV(connection_string, True)
 
 # get current location (HOME)
-LEAPFROG.cur_lat = LEAPFROG.vehicle.location.global_relative_frame.lat
-LEAPFROG.cur_lon = LEAPFROG.vehicle.location.global_relative_frame.lon
-LEAPFROG.cur_alt = LEAPFROG.vehicle.location.global_relative_frame.alt
+LEAPFROG.get_curPosition()
  
 # set fake obstacle for testing at 2m alt
-LEAPFROG.obs_lat = LEAPFROG.cur_lat + 0.0001 
-LEAPFROG.obs_lon = LEAPFROG.cur_lon + 0.0001
-LEAPFROG.obs_alt = LEAPFROG.cur_alt + 2
+LEAPFROG.obs_lat = LEAPFROG.cur_lat + 0.00005 
+LEAPFROG.obs_lon = LEAPFROG.cur_lon + 0.00005
+LEAPFROG.obs_alt = LEAPFROG.cur_alt + 2 
 
-# print("Checking if waypoints are defined:")
+print("Checking if waypoints are defined:")
 # File_1_exists = LEAPFROG.DefineWaypoints('phase_1.csv')
 # File_2_exists = LEAPFROG.DefineWaypoints('phase_2.csv')
 # File_3_exists = LEAPFROG.DefineWaypoints('phase_3.csv')
@@ -78,6 +64,8 @@ LEAPFROG.vehicle.add_attribute_listener('rangerfinder', LEAPFROG.rangefinder_cal
 # LEAPFROG.vehicle.add_attribute_listener('rangerfinder2', LEAPFROG.rangefinder2_callback)
 # Flight params
 MISSIONSTART = False
+
+LEAPFROG.get_state()
 
 # [IDLE]
 while True:
