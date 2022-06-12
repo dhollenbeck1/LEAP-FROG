@@ -21,29 +21,31 @@ import obstacleAvoidance
 # -- define a UAV class
 class UAV:
     
-    oa_type = 2
-    takeoff_alt = 20 
-    obs_speed = 1
-    mode_current = "VehicleMode:Default"
-    mode_target = "VehicleMode:GUIDED"
-    last_rangefinder_distance=0
-    cur_lat = 0
-    cur_lon = 0
-    cur_alt = 0
-    obs_lat = 0
-    obs_lon = 0
-    obs_alt = 0
-    threshold_dist = 10
-    gain_oa = 0.1
-    obs_dlat = 100
-    obs_dlon = 100
-    obs_dalt = 100
-    control_lat = 0
-    control_lon = 0
-    control_alt = 0
-    tar_lat = 0
-    tar_lon = 0
-    tar_alt = 0
+    # -- default parameter constructor
+    def __init__(self):
+        self.oa_type = 2
+        self.takeoff_alt = 20 
+        self.obs_speed = 1
+        self.mode_current = "VehicleMode:Default"
+        self.mode_target = "VehicleMode:GUIDED"
+        self.last_rangefinder_distance=0
+        self.cur_lat = 0
+        self.cur_lon = 0
+        self.cur_alt = 0
+        self.obs_lat = 0
+        self.obs_lon = 0
+        self.obs_alt = 0
+        self.threshold_dist = 10
+        self.gain_oa = 0.1
+        self.obs_dlat = 100
+        self.obs_dlon = 100
+        self.obs_dalt = 100
+        self.control_lat = 0
+        self.control_lon = 0
+        self.control_alt = 0
+        self.tar_lat = 0
+        self.tar_lon = 0
+        self.star_alt = 0
 
     # -- define waypoints for drone
     def DefineWaypoints(self, waypointsFile):
