@@ -30,19 +30,19 @@ global mode_current, mode_target
 #kp = 0.08
 LEAPFROG = VehicleClass2.UAV()
 
-def check_current_mode(mode_current):
-    if mode_current == 'QRTL':
-        LEAPFROG.vehicle_VTOL_mode = True
-    else: 
-        LEAPFROG.vehicle_VTOL_mode = False
-        print('Current UAV mode is not in VTOL, please check the vehicle mode')
-        # break /should return previous state
-    return LEAPFROG.vehicle_VTOL_mode
+# def check_current_mode(mode_current):
+#     if mode_current == 'QRTL':
+#         LEAPFROG.vehicle_VTOL_mode = True
+#     else: 
+#         LEAPFROG.vehicle_VTOL_mode = False
+#         print('Current UAV mode is not in VTOL, please check the vehicle mode')
+#         # break /should return previous state
+#     return LEAPFROG.vehicle_VTOL_mode
 
-def detect_obstacles():
-    if LEAPFROG.vehicle.rangefinder.voltage == True:# Not sure what are the normal voltage value and abnormal voltage value
+def detect_obstacles(LEAPFROG.ob_cur_distance):
+    if LEAPFROG.rangefinder_voltage == True:# Not sure what are the normal voltage value and abnormal voltage value
         # listner
-        if LEAPFROG.vehicle.rangefinder.distance <= LEAPFROG.OV_distance_threshold:# distance in cm or m?
+        if LEAPFROG.ob_cur_distance <= LEAPFROG.OV_distance_threshold:# distance in cm or m?
             LEAPFROG.OV_enable_flag = True
         else:
             LEAPFROG.OV_enable_flag = False
@@ -56,32 +56,34 @@ def main_workflow(mode_current):
     # scanLoop iteration parameter
     scanLoop = 1
     # Check VTOl Mode
-    if check_current_mode(mode_current):    
+    #if check_current_mode(mode_current):    
         # check OV_enable_flag
-        while detect_obstacles():
-            # Altitude Hold 
-            #cur_altitude = LEAPFROG.vehicle.location.global_relative_frame.alt
-            # -- Not sure how to do altutide hold
-            obstacles_distance = LEAPFROG.vehicle.rangefinder.distance
+    while detect_obstacles(LEAPFROG.ob_cur_distance):
+        # Altitude Hold 
+        #cur_altitude = LEAPFROG.vehicle.location.global_relative_frame.alt
+        # -- Not sure how to do altutide hold
+        obstacles_distance = LEAPFROG.ob_cur_distance
+        current_yaw = LEAPFROG.vehicle.attitude.yaw
+        # Scan around from current heading position with offset 90 degrees at each time.
+        # current heading
+        while obstacles_distance is not LEAPFROG.OV_distance_threshold:
+            u_v = p_controller(obstacles_distance)
+            if scanLoop & 1 != 0:
+                send_global_velocity(-u_v,0)
+            else:
+                send_global_velocity(0,-u_v)
+            next_yaw = current_yaw + 90
+            condition_yaw(next_yaw)
+            # Get the current rangefinder distance, yaw
+            obstacles_distance = LEAPFROG.ob_cur_distance
             current_yaw = LEAPFROG.vehicle.attitude.yaw
-            # Scan around from current heading position with offset 90 degrees at each time.
-            # current heading
-            while obstacles_distance is not LEAPFROG.OV_distance_threshold:
-                u_v = p_controller(obstacles_distance)
-                if scanLoop & 1 != 0:
-                    send_global_velocity(-u_v,0)
-                else:
-                    send_global_velocity(0,-u_v)
-                next_yaw = current_yaw + 90
-                condition_yaw(next_yaw)
-                # Get the current rangefinder distance, yaw
-                obstacles_distance = LEAPFROG.vehicle.rangefinder.distance
-                current_yaw = LEAPFROG.vehicle.attitude.yaw
-                scanLoop = scanLoop + 1
-        
-        LEAPFROG.OV_done_flag = True
-    else:
-        LEAPFROG.OV_enable_flag = False
+            scanLoop = scanLoop + 1
+        LEAPFROG.ob_cur_distance = LEAPFROG.ob_cur_distance - 1
+
+    
+    LEAPFROG.OV_done_flag = True
+    #else:
+    #    LEAPFROG.OV_enable_flag = False
     return LEAPFROG.OV_enable_flag, LEAPFROG.OV_done_flag   
 
 def p_controller(obstacles_distance):

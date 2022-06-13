@@ -23,7 +23,7 @@ class UAV:
     
     # -- default parameter constructor
     def __init__(self):
-        self.oa_type = 2
+        self.oa_type = 1
         self.takeoff_alt = 20 
         self.obs_speed = 1
         self.mode_current = "VehicleMode:Default"
@@ -51,6 +51,13 @@ class UAV:
         self.OV_done_flag = False
         self.vehicle_VTOL_mode = False
         self.kp = 0.08
+        # OV_no_rangfinder
+        self.ob_cur_distance = 0
+        self.rangefinder_voltage = True
+        self.ob_distance_1 = 5
+        self.ob_distance_2 = 5
+        self.ob_distance_3 = 5
+        self.ob_distance_4 = 5
 
     # -- define waypoints for drone
     def DefineWaypoints(self, waypointsFile):
@@ -215,7 +222,7 @@ class UAV:
         # -- run obstacle avoidance
         
         if self.oa_type == 1:
-            OV_enable_flag, OV_done_flag = obstacleAvoidance.main_workflow(self.mode_current)
+            OV_enable_flag, OV_done_flag = obstacleAvoidance.main_workflow(self.ob_distance_1)
             if OV_done_flag and not OV_enable_flag:
                 print('Obstacle avoidance has been done successfully')
                 # Implementing landing procedures
