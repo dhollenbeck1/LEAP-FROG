@@ -27,7 +27,7 @@ run the following command to check which i2c port are currently occupied.
 ```
 ls /dev/*i2c*
 ```
-then running the following command with specific i2c port number, usuallt should be 1
+then running the following command with specific i2c port number, usually should be 1
 ```
 i2cdetect -y 1
 ```
