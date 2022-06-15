@@ -46,18 +46,19 @@ class UAV:
         self.tar_lat = 0
         self.tar_lon = 0
         self.star_alt = 0
-        self.OV_distance_threshold = 7
+        self.OV_distance_threshold = 700 #cm
         self.OV_enable_flag = False
         self.OV_done_flag = False
         self.vehicle_VTOL_mode = False
         self.kp = 0.08
         # OV_no_rangfinder
-        self.ob_cur_distance = 0
-        self.rangefinder_voltage = True
-        self.ob_distance_1 = 5
-        self.ob_distance_2 = 5
-        self.ob_distance_3 = 5
-        self.ob_distance_4 = 5
+        #cm, maximum, 700 means no obstacles.
+        self.rangefinder1 = 700
+        self.rangefinder2 = 700
+        self.rangefinder3 = 700
+        self.rangefinder4 = 700
+        self.rangefinders = [self.rangefinder1, self.rangefinder2, self.rangefinder3, self.rangefinder4]
+        
 
     # -- define waypoints for drone
     def DefineWaypoints(self, waypointsFile):
