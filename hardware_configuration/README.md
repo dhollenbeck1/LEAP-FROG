@@ -20,7 +20,7 @@ Pin(3) SDA to sensor SDA
 ### Pre-install packages for i2c tools and PMBus.
 ```
 sudo apt-get install i2c-tools
-pip3 install smbus2
+sudo apt-get install python-smbus
 ```
 ### Check whether i2c would be able to detect multiple rangfinders, it should be at different address
 run the following command to check which i2c port are currently occupied.

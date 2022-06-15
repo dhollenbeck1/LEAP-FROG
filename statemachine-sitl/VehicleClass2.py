@@ -1,7 +1,7 @@
 """
 Created on Tuesday May 31st, 2022
 
-@author: Rafal Krzysiak and Derek Hollenbeck
+@author: Rafal Krzysiak and Derek Hollenbeck and Di An
 
 This class will act as a communication between the
 UAV (real or simulated) and dronekit/mission planner
@@ -12,11 +12,13 @@ Usage:
 
 # -- import required libraries
 from dronekit import connect, VehicleMode, LocationGlobalRelative
+from pymavlink import mavutil # Needed for command message definitions
+from smbus import SMBus # i2c Bus package 
 import time
 import os.path
 import csv
 import math
-import obstacleAvoidance
+#import obstacleAvoidance
 
 # -- define a UAV class
 class UAV:
@@ -47,12 +49,17 @@ class UAV:
         self.tar_lon = 0
         self.star_alt = 0
         self.OV_distance_threshold = 700 #cm
-        self.OV_enable_flag = False
+        self.OV_min_threhold = 200 # cm
         self.OV_done_flag = False
-        self.vehicle_VTOL_mode = False
+        self.OV_enable_flag = False
         self.kp = 0.08
-        # OV_no_rangfinder
-        #cm, maximum, 700 means no obstacles.
+        self.u_v1 = 0
+        self.u_v2 = 0
+        self.u_v3 = 0
+        self.u_v4 = 0
+        self.u_v_x = []
+        self.u_v_y = []
+        self.i2cbus = SMBus(1)
         self.rangefinder1 = 700
         self.rangefinder2 = 700
         self.rangefinder3 = 700
@@ -221,13 +228,16 @@ class UAV:
         # -- Control output (lat and lon pos, alt doesnt change from current)    
         # -- turn on rangefinder listener
         # -- run obstacle avoidance
-        
+
+        # Turn on all rangefinders       
+
         if self.oa_type == 1:
-            OV_enable_flag, OV_done_flag = obstacleAvoidance.main_workflow(self.ob_distance_1)
-            if OV_done_flag and not OV_enable_flag:
+            self.OV_done_flag, self.OV_enable_flag= self.obstacle_Avoidance_Rangefinders
+            if self.OV_done_flag and not self.OV_enable_flag:
                 print('Obstacle avoidance has been done successfully')
                 # Implementing landing procedures
                 # ---
+                self.i2cbus.close()
             # -- turn off rangefinder listener
             else:
                 print('Obstacle avoidance is not successful and we cannot land here')
@@ -240,11 +250,6 @@ class UAV:
         # -- Close vehicle object before exiting script
         self.close_drone()
         
-
-        
-    # I don't recommend to use call_back function to monitoring the rangefinder sensor,
-    # Since attributes which reflect vehicle “state” are only updated when their values change,
-    # rangefinder sensor value is going to change rapidly which going to be chaos.
     def rangefinder_callback(self):
         #attr_name not used here.      
         if self.last_rangefinder_distance == round(self.vehicle.rangefinder.distance, 1):
@@ -252,27 +257,104 @@ class UAV:
         self.last_rangefinder_distance = round(self.vehicle.rangefinder.distance, 1)
         print("Rangefinder2 (metres): %s" % self.last_rangefinder_distance)
         return self.last_rangefinder_distance
-
-    #@vehicle.on_attribute('rangefinder1')
-    # def rangefinder1_callback(self):
-    #     #attr_name not used here.
-    #     global last_rangefinder1_distance
-    #     if last_rangefinder1_distance == round(self.vehicle.rangefinder.distance, 1):
-    #          return
-    #     last_rangefinder1_distance = round(self.vehicle.rangefinder.distance, 1)
-    #     print("Rangefinder1 (metres): %s" % last_rangefinder1_distance)
         
+    def rangefinders_update(self):
         
-    # def rangefinder2_callback(self):
-    #     #attr_name not used here.
-    #     global last_rangefinder2_distance
+        self.i2cbus.write_byte(0x70,0x51)
+        self.i2cbus.write_byte(0x6F,0x51)
+        self.i2cbus.write_byte(0x6E,0x51)
+        self.i2cbus.write_byte(0x6D,0x51)
+        time.sleep(0.12)
+        val1 = self.i2cbus.read_word_data(0x70,0xE1)
+        val2 = self.i2cbus.read_word_data(0x6f,0xE1)
+        val3 = self.i2cbus.read_word_data(0x6e,0xE1)
+        val4 = self.i2cbus.read_word_data(0x6d,0xE1)
+
+        self.rangefinder1 = (val1>>8) & 0xff | (val1 & 0xff)
+        self.rangefinder2 = (val2>>8) & 0xff | (val2 & 0xff)
+        self.rangefinder3 = (val3>>8) & 0xff | (val3 & 0xff)
+        self.rangefinder4 = (val4>>8) & 0xff | (val4 & 0xff)
+
+        self.rangefinders = [self.rangefinder1, self.rangefinder2, self.rangefinder3, self.rangefinder4]
+        return self.rangefinders
+
+    def detect_obstacles(self):
+        if self.OV_min_threhold < self.rangefinders[0] < self.OV_distance_threshold or self.OV_min_threhold < self.rangefinders[1] < self.OV_distance_threshold or \
+            self.OV_min_threhold < self.rangefinders[2] < self.OV_distance_threshold or self.OV_min_threhold < self.rangefinders[3] <= self.OV_distance_threshold:# distance in cm or m?
+            self.OV_enable_flag = True
+        else:
+            self.OV_enable_flag = False
+        return self.OV_enable_flag
+
+    def p_controller(self, range_val):
+
+        range_val = self.kp*(self.OV_distance_threshold - range_val)
+    
+        return range_val
+
+    def obstacle_Avoidance_Rangefinders(self):
+    
+        if (self.vehicle.mode.name == 'QRTL' or self.vehicle.mode.name == 'QLAND') and self.vehicle.groundspeed < 2:
+            while self.OV_done_flag and self.OV_enable_flag:
+                self.rangefinders = self.rangefinders_update(self)
+                while self.detect_obstacles(self):
+
+                    self.u_v1 = self.p_controller(self.rangefinders[0])
+                    self.u_v2 = self.p_controller(self.rangefinders[1])
+                    self.u_v3 = self.p_controller(self.rangefinders[2])
+                    self.u_v4 = self.p_controller(self.rangefinders[3])
+                    # （u_v_x, u_v_y） = (0,-u_v1) + (-u_v2,0) + (0, u_v3) + (u_v4, 0)
+                    self.u_v_x = -self.u_v2 + self.u_v4 
+                    self.u_v_y = -self.u_v1 + self.u_v3 
+
+                    if self.u_v_x > 1: # 1 m/s
+                        self.u_v_x = 1
+                    elif self.u_v_y > 1:
+                        self.u_v_x = 1
+
+                    self.send_global_velocity(self.u_v_x,self.u_v_y) # unit is m/s
+                    time.sleep(0.15)
+                
+                self.OV_done_flag = True
+                self.OV_enable_flag = True
+            else:
+                print("Current Mode is not correct, please check back to land mode which is QRTL or QLAND")
+        return self.OV_done_flag, self.OV_enable_flag       
+    def send_global_velocity(self,velocity_x, velocity_y, velocity_z, duration):
+        """
+        Move vehicle in direction based on specified velocity vectors.
+
+        This uses the SET_POSITION_TARGET_GLOBAL_INT command with type mask enabling only 
+        velocity components 
+        (http://dev.ardupilot.com/wiki/copter-commands-in-guided-mode/#set_position_target_global_int).
         
-    #     if last_rangefinder2_distance == round(self.vehicle.rangefinder.distance, 1):
-    #          return
-    #     last_rangefinder2_distance = round(self.vehicle.rangefinder.distance, 1)
-    #     print("Rangefinder2 (metres): %s" % last_rangefinder2_distance)
+        Note that from AC3.3 the message should be re-sent every second (after about 3 seconds
+        with no message the velocity will drop back to zero). In AC3.2.1 and earlier the specified
+        velocity persists until it is canceled. The code below should work on either version 
+        (sending the message multiple times does not cause problems).
+        
+        See the above link for information on the type_mask (0=enable, 1=ignore). 
+        At time of writing, acceleration and yaw bits are ignored.
+        """
+        msg = self.vehicle.message_factory.set_position_target_global_int_encode(
+            0,       # time_boot_ms (not used)
+            0, 0,    # target system, target component
+            mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT, # frame
+            0b0000111111000111, # type_mask (only speeds enabled)
+            0, # lat_int - X Position in WGS84 frame in 1e7 * meters
+            0, # lon_int - Y Position in WGS84 frame in 1e7 * meters
+            0, # alt - Altitude in meters in AMSL altitude(not WGS84 if absolute or relative)
+            # altitude above terrain if GLOBAL_TERRAIN_ALT_INT
+            velocity_x, # X velocity in NED frame in m/s
+            velocity_y, # Y velocity in NED frame in m/s
+            velocity_z, # Z velocity in NED frame in m/s
+            0, 0, 0, # afx, afy, afz acceleration (not supported yet, ignored in GCS_Mavlink)
+            0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
 
-
+        # send command to vehicle on 1 Hz cycle
+        for x in range(0,duration):
+            self.vehicle.send_mavlink(msg)
+            time.sleep(1)    
     # -- this function will get the distance between the UAV to the waypoint
     def get_distance_metres(self):
         """
