@@ -38,6 +38,10 @@ LEAPFROG.connect_UAV('tcp:127.0.0.1:5762', True) #LEAPFROG.connect_UAV(connectio
 
 # get current location (HOME)
 LEAPFROG.get_curPosition()
+
+# get the mission commands
+num_waypoints_auto = float(LEAPFROG.download_mission())
+# print("number of waypoints: " % num_waypoints_auto)
  
 # set fake obstacle for testing at 2m alt
 LEAPFROG.obs_lat = LEAPFROG.cur_lat + 0.00005 
@@ -105,7 +109,26 @@ PHASE 2:
 PHASE 3:
     ...
 """
-
+print('Entering Auto Mission')
+LEAPFROG.setMode("AUTO")
+LEAPFROG.vehicle.commands.next=1
+while True:
+    nextwaypoint=LEAPFROG.vehicle.commands.next
+    if nextwaypoint == num_waypoints_auto and LEAPFROG.distance_to_current_waypoint() < 30:
+        print('exiting auto')
+        break
+    print('Distance to waypoint (%s): %s' % (nextwaypoint, LEAPFROG.distance_to_current_waypoint()))
+  
+    # if nextwaypoint==3: #Skip to next waypoint
+    #     print('Skipping to Waypoint 5 when reach waypoint 3')
+    #     vehicle.commands.next = 5
+    # if nextwaypoint==5: #Dummy waypoint - as soon as we reach waypoint 4 this is true and we exit.
+    #     print("Exit 'standard' mission when start heading to final waypoint (5)")
+    #     break;
+    time.sleep(1)
+    
+print('Return to GUIDED mode')
+LEAPFROG.setMode("GUIDED")
 
 ##########################################
 """
