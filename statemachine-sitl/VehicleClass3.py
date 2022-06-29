@@ -98,8 +98,8 @@ class UAV:
     # -- function to initialize the connection between the drone and mission planner
     def connect_UAV(self, tcp, wait_ready):
         self.vehicle = connect(tcp, wait_ready)
-    # def connect_UAV(self, ip, WAITREADY, BAUDRATE):
-    #     self.vehicle = connect(ip, wait_ready=WAITREADY, baud=BAUDRATE)
+    def connect_UAV_serial(self, ip, WAITREADY, BAUDRATE):
+        self.vehicle = connect(ip, wait_ready=WAITREADY, baud=BAUDRATE)
 
     # -- get the state of the UAV
     def get_state(self):

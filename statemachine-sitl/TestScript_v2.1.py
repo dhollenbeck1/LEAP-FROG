@@ -14,11 +14,11 @@ be placed into loiter mode for some time. After the time is
 """
 
 # -- import required libraries
-import VehicleClass
+import VehicleClass3
 import time
 
 # -- define the drone to be used 
-LEAPFROG = VehicleClass.UAV()
+LEAPFROG = VehicleClass3.UAV()
 
 # -- connect to the drone and get the state of LEAPFROG
 # -- connect_UAV function accepts the TCP and wait_ready commands only
