@@ -35,7 +35,7 @@ PHASE 0: Start Program (initialization)
 
 LEAPFROG = VehicleClass3.UAV()
 # LEAPFROG.connect_UAV('tcp:127.0.0.1:5762', True) #LEAPFROG.connect_UAV(connection_string, True)
-LEAPFROG.connect_UAV('/dev/ttyAMA0',True,3)
+LEAPFROG.connect_UAV('/dev/ttyS0',True,3)
 
 # get current location (HOME)
 LEAPFROG.get_curPosition()
