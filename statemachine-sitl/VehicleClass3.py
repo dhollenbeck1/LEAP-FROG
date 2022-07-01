@@ -104,7 +104,7 @@ class UAV:
             self.vehicle = connect(addrss, wait_ready=WAITREADY)
         elif flag == 2:
             self.vehicle = connect(addrss, wait_ready=WAITREADY, baud=921600)
-        else:           # -- for UDP
+        elif flag == 3:           # -- for UDP
             self.vehicle = connect(addrss, wait_ready=WAITREADY, baud=115200)
 
     # -- get the state of the UAV
