@@ -455,8 +455,8 @@ class UAV:
         time.sleep(self.rng_Ts)
         val1 = self.i2cbus.read_word_data(0x70, 0xE1)
         val2 = self.i2cbus.read_word_data(0x6f, 0xE1)
-        rng1 = (val1 >> 8) & 0xff | (val1 & 0xff)
-        rng2 = (val2 >> 8) & 0xff | (val2 & 0xff)
+        rng1 = (val1 >> 8) & (0xff | (val1 & 0xff))
+        rng2 = (val2 >> 8) & (0xff | (val2 & 0xff))
         rng3 = -1
         rng4 = -1
         print("rangfinder 1 %s cm" % rng1)
