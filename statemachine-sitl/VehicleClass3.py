@@ -12,6 +12,7 @@ Usage:
 
 # -- import required libraries
 from dronekit import connect, VehicleMode, LocationGlobalRelative, LocationGlobal, Command
+from smbus import SMBus
 import time
 import os.path
 import csv
@@ -24,6 +25,7 @@ class UAV:
     
     # -- default parameter constructor
     def __init__(self):
+        self.i2cbus = SMBus(1)
         self.oa_type = 1
         self.takeoff_alt = 20 
         self.obs_speed = 1
@@ -54,6 +56,7 @@ class UAV:
         self.kp = 0.08
         # OV_no_rangfinder
         #cm, maximum, 700 means no obstacles.
+        self.rng_Ts = 0.2
         self.rangefinder1 = 700
         self.rangefinder2 = 700
         self.rangefinder3 = 700
@@ -96,10 +99,13 @@ class UAV:
         print("====================================================================================")
 
     # -- function to initialize the connection between the drone and mission planner
-    def connect_UAV(self, tcp, wait_ready):
-        self.vehicle = connect(tcp, wait_ready)
-    # def connect_UAV(self, ip, WAITREADY, BAUDRATE):
-    #     self.vehicle = connect(ip, wait_ready=WAITREADY, baud=BAUDRATE)
+    def connect_UAV(self, addrss, WAITREADY, flag):
+        if flag == 1:   # -- for TCP
+            self.vehicle = connect(addrss, wait_ready=WAITREADY)
+        elif flag == 2:
+            self.vehicle = connect(addrss, wait_ready=WAITREADY, baud=921600)
+        else:           # -- for UDP
+            self.vehicle = connect(addrss, wait_ready=WAITREADY, baud=115200)
 
     # -- get the state of the UAV
     def get_state(self):
@@ -441,6 +447,22 @@ class UAV:
         self.vehicle.mode = VehicleMode(newMode)
         self.mode_target = "VehicleMode:" + newMode
         self.mode_current = self.mode_target
+        
+    def getRngFinders(self):
+        # while True:
+        self.i2cbus.write_byte(0x70, 0x51)
+        self.i2cbus.write_byte(0x6f, 0x51)
+        time.sleep(self.rng_Ts)
+        val1 = self.i2cbus.read_word_data(0x70, 0xE1)
+        val2 = self.i2cbus.read_word_data(0x6f, 0xE1)
+        rng1 = (val1 >> 8) & 0xff | (val1 & 0xff)
+        rng2 = (val2 >> 8) & 0xff | (val2 & 0xff)
+        rng3 = -1
+        rng4 = -1
+        print("rangfinder 1 %s cm" % rng1)
+        print("rangfinder 2 %s cm" % rng2)
+        self.rangfinders = [rng1,rng2,rng3,rng4]
+        return self.rangfinders
         
     def compareMode(self, mode_current):
         #print("Mode target: %s, Mode current: %s" % (mode_target, mode_current))
