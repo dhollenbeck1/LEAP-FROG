@@ -14,10 +14,10 @@ be placed into loiter mode for some time. After the time is
 """
 
 # -- import required libraries
-import VehicleClass
+import VehicleClass3
 
 # -- define the drone to be used 
-LEAPFROG = VehicleClass.UAV()
+LEAPFROG = VehicleClass3.UAV()
 
 # -- read waypoints txt file and define whether or not you will 
 # -- implement a waypoint path from a csv file
