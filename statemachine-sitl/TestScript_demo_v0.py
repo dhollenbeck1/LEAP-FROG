@@ -53,6 +53,11 @@ print("Checking if waypoints are defined:")
 # File_5_exists = LEAPFROG.DefineWaypoints('phase_5.csv')
 # File_6_exists = LEAPFROG.DefineWaypoints('phase_6.csv')
 
+# set fake obstacle for testing at 2m alt
+LEAPFROG.obs_lat = LEAPFROG.cur_lat + 0.00005 
+LEAPFROG.obs_lon = LEAPFROG.cur_lon + 0.00005
+LEAPFROG.obs_alt = LEAPFROG.cur_alt + 2 
+
 print("Getting current mode")
 LEAPFROG.mode_current = LEAPFROG.getMode()
 time.sleep(1)
@@ -175,7 +180,7 @@ PHASE 6:
 print("PHASE 6: Control handoff point 2")
 print("Switching mode to: LOITER")
 LEAPFROG.setMode("LOITER")
-loiterTime = 20  # min
+loiterTime = 1  # min
 loiterTime_interval = 20
 print("LOITER time: %s, sleep interval: %s" % (loiterTime, loiterTime_interval))
 while True:

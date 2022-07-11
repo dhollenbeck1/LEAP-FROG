@@ -292,8 +292,7 @@ class UAV:
     
         return range_val
 
-    def obstacle_Avoidance_Rangefinders(self):
-    
+    def obstacle_Avoidance_Rangefinders(self):  
         if (self.vehicle.mode.name == 'QRTL' or self.vehicle.mode.name == 'QLAND') and self.vehicle.groundspeed < 2:
             while self.OV_done_flag and self.OV_enable_flag:
                 self.rangefinders = self.rangefinders_update(self)
@@ -319,7 +318,8 @@ class UAV:
                 self.OV_enable_flag = True
             else:
                 print("Current Mode is not correct, please check back to land mode which is QRTL or QLAND")
-        return self.OV_done_flag, self.OV_enable_flag       
+        return self.OV_done_flag, self.OV_enable_flag  
+     
     def send_global_velocity(self,velocity_x, velocity_y, velocity_z, duration):
         """
         Move vehicle in direction based on specified velocity vectors.
