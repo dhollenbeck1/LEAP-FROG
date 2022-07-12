@@ -45,7 +45,7 @@ num_waypoints_auto = float(LEAPFROG.download_mission())
 print("number of waypoints: %s" % num_waypoints_auto)
  
 
-print("Checking if waypoints are defined:")
+# print("Checking if waypoints are defined:")
 # File_1_exists = LEAPFROG.DefineWaypoints('phase_1.csv')
 # File_2_exists = LEAPFROG.DefineWaypoints('phase_2.csv')
 # File_3_exists = LEAPFROG.DefineWaypoints('phase_3.csv')
@@ -109,6 +109,7 @@ PHASE 2:
 print("PHASE 2: Moving to control handoff point")
 print("defining PHASE 2 waypoints:")
 File_1_exists = LEAPFROG.DefineWaypoints('phase_2_demo_v0.csv')
+# File_1_exists = LEAPFROG.DefineWaypoints('phase_n_example.csv')
 LEAPFROG.Waypoint_Travel(22) # airspeed
 
 

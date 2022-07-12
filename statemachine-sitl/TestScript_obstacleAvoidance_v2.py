@@ -37,9 +37,9 @@ LEAPFROG = VehicleClass3.UAV()
 LEAPFROG.connect_UAV('tcp:127.0.0.1:5762',True,1) #LEAPFROG.connect_UAV(connection_string, True)
 # LEAPFROG.connect_UAV('/dev/ttyS0',True,3)
 
-LEAPFROG.OV_enable_flag = True
+# LEAPFROG.OV_enable_flag = True
 
-LEAPFROG.takeoff_alt = 20
+LEAPFROG.takeoff_alt = 25
 
 # get current location (HOME)
 LEAPFROG.get_curPosition()
