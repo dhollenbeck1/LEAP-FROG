@@ -657,7 +657,9 @@ class UAV:
         while True:
             print(" Altitude: %s m" % self.vehicle.location.global_relative_frame.alt)
             # self.simpleObstacleAvoidance()
-            self.obstacle_Avoidance_Rangefinders_Sim()
+            if self.OV_enable_flag:
+                self.obstacle_Avoidance_Rangefinders_Sim()
+            
             time.sleep(0.5) # -- slow the printing of the altitude of the drone
 
             # -- Break the loop when the drone lands within some threshold.
