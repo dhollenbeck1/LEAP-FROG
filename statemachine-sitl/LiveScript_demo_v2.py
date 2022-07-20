@@ -34,8 +34,9 @@ PHASE 0: Start Program (initialization)
 """
 
 LEAPFROG = VehicleClass3.UAV()
-LEAPFROG.connect_UAV('tcp:127.0.0.1:5762', True,1) #LEAPFROG.connect_UAV(connection_string, True)
-# LEAPFROG.connect_UAV('/dev/ttyS0',True,2)
+# LEAPFROG.connect_UAV('tcp:127.0.0.1:5762', True,1) #LEAPFROG.connect_UAV(connection_string, True)
+LEAPFROG.connect_UAV('/dev/ttyAMA0',True,2)
+# LEAPFROG.connect_UAV('/dev/ttyS0',True,3)
 
 # get current location (HOME)
 LEAPFROG.get_curPosition()
@@ -137,7 +138,7 @@ if MISSIONSTART:
     print("Switching mode to: LOITER")
     # LEAPFROG.vehicle.parameters['Q_GUIDED_MODE'] = 0
     LEAPFROG.setMode("LOITER")
-    loiterTime = 1#2  # min
+    loiterTime = 2  # min
     loiterTime_interval = 20 # sec
     while True:
         kmax = int((60*loiterTime/loiterTime_interval))
@@ -200,7 +201,7 @@ if MISSIONSTART:
     print("PHASE 6: Control handoff point 2")
     print("Switching mode to: LOITER")
     LEAPFROG.setMode("LOITER")
-    loiterTime = 1#2  # min
+    loiterTime = 2  # min
     loiterTime_interval = 20
     print("LOITER time: %s, sleep interval: %s" % (loiterTime, loiterTime_interval))
     while True:
@@ -234,7 +235,7 @@ if MISSIONSTART:
     print("PHASE 8: Control Handoff point 3: Cruising Leg")
     print("Switching mode to: LOITER")
     LEAPFROG.setMode("LOITER")
-    loiterTime = 1#2  # min
+    loiterTime = 2  # min
     loiterTime_interval = 20
     print("LOITER time: %s, sleep interval: %s" % (loiterTime, loiterTime_interval))
     while True:
@@ -260,7 +261,7 @@ if MISSIONSTART:
     LEAPFROG.Waypoint_Travel(22) # airspeed
     print("Switching mode to: LOITER")
     LEAPFROG.setMode("LOITER")
-    loiterTime = 1#30  # min
+    loiterTime = 30  # min
     loiterTime_interval = 20
     print("LOITER time: %s, sleep interval: %s" % (loiterTime, loiterTime_interval))
     while True:
